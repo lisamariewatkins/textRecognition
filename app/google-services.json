@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "484052280801",
+    "firebase_url": "https://treadmill-ocr.firebaseio.com",
+    "project_id": "treadmill-ocr",
+    "storage_bucket": "treadmill-ocr.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:484052280801:android:ffc039d9f91949bd",
+        "android_client_info": {
+          "package_name": "watkins.lisa.com.treadmillocr"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "484052280801-qu1phf8daru3chobikopoimt7f18kj8d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAgiPFtBW7B4T9bOtDcJmYP53pZmG8VRQs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
