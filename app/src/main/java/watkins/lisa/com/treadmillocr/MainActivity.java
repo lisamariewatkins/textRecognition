@@ -2,7 +2,11 @@ package watkins.lisa.com.treadmillocr;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Environment;
@@ -12,6 +16,7 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -40,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Uri currentPhotoUri;
     private String currentPhotoFilePath;
+    private Bitmap rotatedBitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,13 +67,13 @@ public class MainActivity extends AppCompatActivity {
             try {
                 Bitmap imageBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), currentPhotoUri);
 
-                Bitmap rotatedBitmap = ensureImageIsInPortraitOrientation(imageBitmap);
+                rotatedBitmap = ensureImageIsInPortraitOrientation(imageBitmap);
 
                 takePhotoButton.setVisibility(View.GONE);
                 imageView.setVisibility(View.VISIBLE);
                 analyzedText.setVisibility(View.VISIBLE);
                 retryButton.setVisibility(View.VISIBLE);
-                imageView.setImageBitmap(rotatedBitmap);
+                // imageView.setImageBitmap(rotatedBitmap);
                 photoAnalysis(rotatedBitmap);
             } catch (Exception e) {
                 Log.d(TAG, e.getLocalizedMessage());
@@ -127,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
             int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
                     ExifInterface.ORIENTATION_UNDEFINED);
 
-            Bitmap rotatedBitmap = null;
+            Bitmap rotatedBitmap;
             switch(orientation) {
 
                 case ExifInterface.ORIENTATION_ROTATE_90:
@@ -161,15 +167,47 @@ public class MainActivity extends AppCompatActivity {
                 matrix, true);
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return super.onTouchEvent(event);
+    }
+
     private class MyTextDetectorOnSuccessListener implements OnSuccessListener<FirebaseVisionText> {
         @Override
         public void onSuccess(FirebaseVisionText firebaseVisionText) {
-            StringBuilder allText = new StringBuilder();
+            // StringBuilder allText = new StringBuilder();
+
+            // make canvas
+            Canvas canvas = new Canvas(rotatedBitmap);
+            imageView.draw(canvas);
+
+            // create transparent paint
+            Paint paint = new Paint();
+            paint.setColor(Color.TRANSPARENT);
+            paint.setStyle(Paint.Style.FILL);
+
             for (FirebaseVisionText.Block block: firebaseVisionText.getBlocks()) {
-                String text = block.getText();
-                allText.append(text + "\n");
+                // String text = block.getText();
+
+                for (FirebaseVisionText.Line line: block.getLines()) {
+                    // ...
+                    for (FirebaseVisionText.Element element: line.getElements()) {
+                        Rect rect = element.getBoundingBox();
+
+                        canvas.drawRect(rect, paint);
+
+                        // create border
+                        paint.setStrokeWidth(10);
+                        paint.setColor(Color.BLACK);
+                        paint.setStyle(Paint.Style.STROKE);
+                        canvas.drawRect(rect, paint);
+                    }
+                }
+
+                // allText.append(text + "\n");
             }
-            analyzedText.setText(allText.toString());
+            imageView.setImageBitmap(rotatedBitmap);
+            // analyzedText.setText(allText.toString());
         }
     }
 
@@ -194,6 +232,7 @@ public class MainActivity extends AppCompatActivity {
             analyzedText.setVisibility(View.GONE);
             retryButton.setVisibility(View.GONE);
             takePhotoButton.setVisibility(View.VISIBLE);
+            rotatedBitmap = null;
             currentPhotoUri = null;
         }
     }
